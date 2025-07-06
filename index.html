@@ -1,13 +1,34 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="utf-8" />
   <title>How Exoplanets Got Smaller</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <main id="chart"></main>
+  <div id="container">
+    
+    <section class="step" data-scene="0">
+      <h1>The Era of Giant Worlds</h1>
+      <p class="subtitle">The first confirmed exoplanet was a hot-Jupiter twice Jupiter’s size.</p>
+      <img src="assets/arrow-down.svg" alt="scroll down" class="scrollHint" />
+    </section>
+
+    <section class="step" data-scene="1"></section>
+    <section class="step" data-scene="2"></section>
+    <section class="step" data-scene="3"></section>
+    <section class="step" data-scene="4"></section>
+
+    <div id="graphic">
+      <svg id="chart" width="960" height="600"></svg>
+      <div id="tooltip" hidden></div>
+    </div>
+
+  </div>
+
   <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/d3-annotation@2.5.1/dist/d3-annotation.min.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
