@@ -1,0 +1,10 @@
+<!-- assets/arrow-down.svg -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48">
+  <!-- background is transparent; fill inherits from CSS -->
+  <polyline points="12 18 24 30 36 18"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="4"
+            stroke-linecap="round"
+            stroke-linejoin="round"/>
+</svg>

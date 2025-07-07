@@ -11,14 +11,29 @@
     
     <section class="step" data-scene="0">
       <h1>The Era of Giant Worlds</h1>
-      <p class="subtitle">The first confirmed exoplanet was a hot-Jupiter twice Jupiter’s size.</p>
+      <p class="subtitle">In 1995, astronomers discovered 51 Pegasi b, the first confirmed exoplanet orbiting a sun-like star. This "hot Jupiter" was twice the size of our own Jupiter, orbiting incredibly close to its star. This discovery marked the beginning of a revolution in our understanding of planetary systems.</p>
       <img src="assets/arrow-down.svg" alt="scroll down" class="scrollHint" />
     </section>
 
-    <section class="step" data-scene="1"></section>
-    <section class="step" data-scene="2"></section>
-    <section class="step" data-scene="3"></section>
-    <section class="step" data-scene="4"></section>
+    <section class="step" data-scene="1">
+      <h1>The Search for Smaller Worlds</h1>
+      <p class="subtitle">As detection methods improved and missions like Kepler launched, astronomers began finding smaller and smaller planets. The average size of discovered exoplanets has decreased dramatically over time, revealing that Earth-sized worlds are actually quite common in our galaxy.</p>
+    </section>
+
+    <section class="step" data-scene="2">
+      <h1>Distribution Shifts Over Time</h1>
+      <p class="subtitle">This ridge plot shows how the distribution of planet sizes has evolved. Early discoveries were dominated by large gas giants, but recent years have revealed a wealth of smaller, rocky planets. The shift reflects both improved detection sensitivity and the true abundance of smaller worlds.</p>
+    </section>
+
+    <section class="step" data-scene="3">
+      <h1>Different Methods, Different Worlds</h1>
+      <p class="subtitle">Different detection methods reveal different types of planets. Transit photometry (like Kepler) excels at finding small, close-in planets. Radial velocity detects larger planets at various distances. Imaging captures distant, massive worlds. Click the legend to explore how each method has contributed to our understanding.</p>
+    </section>
+
+    <section class="step" data-scene="4">
+      <h1>Orbital Architecture</h1>
+      <p class="subtitle">Planet size and orbital distance are intimately connected. Close-in planets tend to be smaller (rocky), while distant planets are often larger (gas giants). This pattern reflects both formation processes and detection biases. Use the slider to see how our discoveries have evolved over time.</p>
+    </section>
 
     <div id="graphic">
       <svg id="chart" width="960" height="600"></svg>
@@ -28,7 +43,7 @@
   </div>
 
   <script src="https://d3js.org/d3.v7.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/d3-annotation@2.5.1/dist/d3-annotation.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/d3-svg-annotation@2.5.1/d3-annotation.min.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
