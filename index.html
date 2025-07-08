@@ -8,44 +8,43 @@
 </head>
 <body>
   <div id="container">
-    <section id="explicit-message" style="margin-bottom: 2em; background: #0a2233; color: #9fd3ff; padding: 1.5em 2em; border-radius: 10px; max-width: 800px; margin-left: auto; margin-right: auto; box-shadow: 0 2px 12px #0003;">
-      <h1 style="margin-top:0;">Exploring the Diversity of Exoplanets</h1>
-      <p style="font-size:1.2em; line-height:1.6;">
-        This interactive narrative visualization tells the story of how our understanding of planets beyond our solar system has evolved since the first discovery in 1995. Through a series of scenes, you'll see how detection methods, planet sizes, and orbital distances have changed over time, revealing the incredible diversity of exoplanets in our galaxy. Scroll down to follow the story, interact with the data, and discover how astronomers have uncovered thousands of new worlds.
-      </p>
-    </section>
-    
-    <section class="step" data-scene="0">
-      <h1>The Era of Giant Worlds</h1>
-      <p class="subtitle">In 1995, astronomers discovered 51 Pegasi b, the first confirmed exoplanet orbiting a sun-like star. This "hot Jupiter" was twice the size of our own Jupiter, orbiting incredibly close to its star. This discovery marked the beginning of a revolution in our understanding of planetary systems.</p>
-      <img src="assets/arrow-down.svg" alt="scroll down" class="scrollHint" />
-    </section>
-
-    <section class="step" data-scene="1">
-      <h1>The Search for Smaller Worlds</h1>
-      <p class="subtitle">As detection methods improved and missions like Kepler launched, astronomers began finding smaller and smaller planets. The average size of discovered exoplanets has decreased dramatically over time, revealing that Earth-sized worlds are actually quite common in our galaxy.</p>
-    </section>
-
-    <section class="step" data-scene="2">
-      <h1>Distribution Shifts Over Time</h1>
-      <p class="subtitle">This ridge plot shows how the distribution of planet sizes has evolved. Early discoveries were dominated by large gas giants, but recent years have revealed a wealth of smaller, rocky planets. The shift reflects both improved detection sensitivity and the true abundance of smaller worlds.</p>
-    </section>
-
-    <section class="step" data-scene="3">
-      <h1>Different Methods, Different Worlds</h1>
-      <p class="subtitle">Different detection methods reveal different types of planets. Transit photometry (like Kepler) excels at finding small, close-in planets. Radial velocity detects larger planets at various distances. Imaging captures distant, massive worlds. Click the legend to explore how each method has contributed to our understanding.</p>
-    </section>
-
-    <section class="step" data-scene="4">
-      <h1>Orbital Architecture</h1>
-      <p class="subtitle">Planet size and orbital distance are intimately connected. Close-in planets tend to be smaller (rocky), while distant planets are often larger (gas giants). This pattern reflects both formation processes and detection biases. Use the slider to see how our discoveries have evolved over time.</p>
-    </section>
-
+    <div class="steps">
+      <section id="explicit-message" style="margin-bottom: 2em; background: #0a2233; color: #9fd3ff; padding: 1.5em 2em; border-radius: 10px; max-width: 800px; margin-left: auto; margin-right: auto; box-shadow: 0 2px 12px #0003;">
+        <h1 style="margin-top:0;">Exploring the Diversity of Exoplanets</h1>
+        <p style="font-size:1.2em; line-height:1.6;">
+          As detection methods improved, the average discovered exoplanet shrank from hot-Jupiters to Earth-size worlds.
+        </p>
+      </section>
+      <div id="scroll-hint-top" style="display: flex; flex-direction: column; align-items: center; margin-bottom: 1.5em;">
+        <span style="color: #9fd3ff; font-size: 1.1em; margin-bottom: 0.3em;">Scroll down for more</span>
+        <img src="assets/arrow-down.svg" alt="scroll down" class="scrollHint" />
+      </div>
+      <section class="step" data-scene="0">
+        <h1>The Era of Giant Worlds</h1>
+        <p class="subtitle">In 1995, astronomers discovered 51 Pegasi b, the first confirmed exoplanet orbiting a sun-like star. This "hot Jupiter" was twice the size of our own Jupiter, orbiting incredibly close to its star. This discovery marked the beginning of a revolution in our understanding of planetary systems.</p>
+        <img src="assets/arrow-down.svg" alt="scroll down" class="scrollHint" />
+      </section>
+      <section class="step" data-scene="1">
+        <h1>The Search for Smaller Worlds</h1>
+        <p class="subtitle">As detection methods improved and missions like Kepler launched, astronomers began finding smaller and smaller planets. The average size of discovered exoplanets has decreased dramatically over time, revealing that Earth-sized worlds are actually quite common in our galaxy.</p>
+      </section>
+      <section class="step" data-scene="2">
+        <h1>Distribution Shifts Over Time</h1>
+        <p class="subtitle">This ridge plot shows how the distribution of planet sizes has evolved. Early discoveries were dominated by large gas giants, but recent years have revealed a wealth of smaller, rocky planets. The shift reflects both improved detection sensitivity and the true abundance of smaller worlds.</p>
+      </section>
+      <section class="step" data-scene="3">
+        <h1>Different Methods, Different Worlds</h1>
+        <p class="subtitle">Different detection methods reveal different types of planets. Transit photometry (like Kepler) excels at finding small, close-in planets. Radial velocity detects larger planets at various distances. Imaging captures distant, massive worlds. Click the legend to explore how each method has contributed to our understanding.</p>
+      </section>
+      <section class="step" data-scene="4">
+        <h1>Orbital Architecture</h1>
+        <p class="subtitle">Planet size and orbital distance are intimately connected. Close-in planets tend to be smaller (rocky), while distant planets are often larger (gas giants). This pattern reflects both formation processes and detection biases. Use the slider to see how our discoveries have evolved over time.</p>
+      </section>
+    </div>
     <div id="graphic">
-      <svg id="chart" width="960" height="600"></svg>
+      <svg id="chart" preserveAspectRatio="xMidYMid meet"></svg>
       <div id="tooltip" hidden></div>
     </div>
-
   </div>
 
   <script src="https://d3js.org/d3.v7.min.js"></script>

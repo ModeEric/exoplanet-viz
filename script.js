@@ -52,10 +52,16 @@ function initScroll() {
   window.addEventListener("keydown", e => {
     if (e.key === "ArrowDown") changeScene(+1);
     if (e.key === "ArrowUp")   changeScene(-1);
+    if (e.key === "Escape") {
+      state.methodFilter.clear();
+      state.yearFilter = [1995, 2024];
+      render();
+    }
   });
 
   window.addEventListener("resize", resize);
   resize();
+  updateSceneNav();
 }
 
 function changeScene(dir) {
@@ -65,6 +71,9 @@ function changeScene(dir) {
 }
 
 function render() {
+  if (state.scene < 3 && state.methodFilter.size) {
+    state.methodFilter.clear();
+  }
   gRoot.selectAll("*").remove();
   
   if (state.scene !== 3 && state.scene !== 4) {
@@ -86,13 +95,14 @@ function render() {
   if (state.scene === 3 || state.scene === 4) {
     drawLegend();
   }
+  updateSceneNav();
 }
 
 function scene0() {
   const w = width(), h = height();
-  
+  const topMargin = 120; // Increased from 60 to 120 for more separation
   const g = gRoot.append("g")
-                 .attr("transform", `translate(${w/2},${h/2})`);
+                 .attr("transform", `translate(${w/2},${(h+topMargin)/2})`);
 
   const circle1 = g.append("circle")
    .attr("r", 120)
@@ -108,14 +118,14 @@ function scene0() {
    .attr("stroke-width", 2);
 
   const text1 = g.append("text")
-   .attr("y", -160)
+   .attr("y", -180) // Move further above the blue dot
    .attr("text-anchor", "middle")
    .attr("fill", "#fff")
    .style("font-size", "36px")
    .text("1995: 51 Peg b");
 
   const text2 = g.append("text")
-   .attr("y", -120)
+   .attr("y", -150) // Move further above the blue dot
    .attr("text-anchor", "middle")
    .attr("fill", "#9fd3ff")
    .style("font-size", "16px")
@@ -235,6 +245,7 @@ function scene2() {
         .attr("x", 0)
         .attr("y", yBand(yr) - 6)
         .attr("fill", "#fff")
+        .style("font-size", "18px")
         .text(yr);
 
     gRow.transition()
@@ -253,6 +264,19 @@ function scene2() {
    .attr("text-anchor", "middle")
    .attr("fill", "#ccc")
    .text("Planet Radius (Earth radii)");
+
+  // After all bins are drawn in scene2, add an annotation to the modal bump of the most recent bin
+  if (bins.length > 0) {
+    const [lastYr, lastRows] = bins[bins.length-1];
+    const hist = d3.bin()
+      .value(d => d.radius)
+      .domain(x.domain())
+      .thresholds(25)(lastRows);
+    const maxBin = hist.reduce((a, b) => (a.length > b.length ? a : b));
+    const modalX = x((maxBin.x0 + maxBin.x1) / 2);
+    const modalY = yBand(lastYr) + yBand.bandwidth() - (d3.scaleLinear().domain([0, d3.max(hist, d => d.length)]).range([0, yBand.bandwidth() - 14])(maxBin.length));
+    addAnn(g, [annSpec(modalX, modalY, 60, -30, 'Super-Earths are most common', 'Peak in recent years', 120)]);
+  }
 }
 
 function scene3() {
@@ -280,9 +304,21 @@ function scene3() {
      .attr("fill",d=>color(d.method))
      .attr("opacity",0.7)
      .attr("clip-path", "url(#clipPlot)")
-     .on("mouseover",(e,d)=> showTooltip(
-        `<strong>${d.name}</strong><br>${d.radius} R⊕<br>${d.method}`, d3.pointer(e)))
-     .on("mouseout", hideTooltip);
+     .on("mouseover",function(e,d){
+        d3.select(this)
+          .transition().duration(100)
+          .attr("r",7)
+          .attr("filter","url(#glow)");
+        showTooltip(
+          `<strong>${d.name}</strong><br>${d.radius} R⊕<br>${d.method}`, d3.pointer(e));
+      })
+     .on("mouseout",function(e,d){
+        d3.select(this)
+          .transition().duration(100)
+          .attr("r",3)
+          .attr("filter",null);
+        hideTooltip();
+      });
 
   g.append("g").attr("transform",`translate(0,${h})`)
     .call(d3.axisBottom(x).ticks(6).tickFormat(d3.format("d")))
@@ -291,6 +327,15 @@ function scene3() {
   g.append("g").call(d3.axisLeft(y).ticks(6,"~s"))
     .style("color", "#ffffff")
     .style("stroke", "#ffffff");
+  g.append("g")
+    .attr("class", "y-grid")
+    .call(d3.axisLeft(y)
+      .ticks(6, "~s")
+      .tickSize(-w)
+      .tickFormat("")
+    )
+    .selectAll("line")
+    .attr("stroke", "#ffffff33");
 
   g.append("text").attr("x",w/2).attr("y",h+40).attr("text-anchor","middle")
    .attr("fill","#ccc").text("Discovery Year");
@@ -322,12 +367,16 @@ function scene4() {
       .attr("min",1995)
       .attr("max",2024)
       .attr("value",state.yearFilter[1])
+      .attr("aria-label","Discovery year upper bound")
+      .attr("tabindex",0)
       .style("width","200px")
       .style("margin","0 10px")
       .on("input", function(){ 
         state.yearFilter[1]=+this.value; 
         render(); 
-      });
+      })
+      .on("focus", function() { this.style.outline = '2px solid #00aaff'; })
+      .on("blur", function() { this.style.outline = ''; });
     
     sliderContainer.append("div")
       .attr("id","yearRangeLabel")
@@ -368,9 +417,21 @@ function scene4() {
      exit   => exit.transition().attr("opacity",0).remove()
    )
    .attr("clip-path", "url(#clipPlot)")
-   .on("mouseover",(e,d)=> showTooltip(
-        `<strong>${d.name}</strong><br>${d.radius} R⊕<br>${d.year}<br>${d.method}`, d3.pointer(e)))
-   .on("mouseout",hideTooltip);
+   .on("mouseover",function(e,d){
+        d3.select(this)
+          .transition().duration(100)
+          .attr("r",7)
+          .attr("filter","url(#glow)");
+        showTooltip(
+          `<strong>${d.name}</strong><br>${d.radius} R⊕<br>${d.year}<br>${d.method}`, d3.pointer(e));
+      })
+   .on("mouseout",function(e,d){
+        d3.select(this)
+          .transition().duration(100)
+          .attr("r",3)
+          .attr("filter",null);
+        hideTooltip();
+      });
 
   g.append("g").attr("transform",`translate(0,${h})`)
     .call(d3.axisBottom(x).ticks(5).tickFormat(d=>d+" AU"))
@@ -379,10 +440,19 @@ function scene4() {
   g.append("g").call(d3.axisLeft(y).ticks(6,"~s"))
     .style("color", "#ffffff")
     .style("stroke", "#ffffff");
+  g.append("g")
+    .attr("class", "y-grid")
+    .call(d3.axisLeft(y)
+      .ticks(6, "~s")
+      .tickSize(-w)
+      .tickFormat("")
+    )
+    .selectAll("line")
+    .attr("stroke", "#ffffff33");
 
-  g.append("text").attr("x",w/2).attr("y",h+45).attr("text-anchor","middle")
+  g.append("text").attr("x",w/2).attr("y",h+margin.bottom-10).attr("text-anchor","middle")
    .attr("fill","#ccc").text("Orbital Distance (Astronomical Units)");
-  g.append("text").attr("x",-h/2).attr("y",-45).attr("transform","rotate(-90)")
+  g.append("text").attr("x",-h/2).attr("y",-margin.left+10).attr("transform","rotate(-90)")
    .attr("text-anchor","middle").attr("fill","#ccc").text("Planet Radius (Earth radii, log scale)");
 
   d3.select("#yearRangeLabel").text(`Showing planets discovered up to ${state.yearFilter[1]}`);
@@ -453,14 +523,33 @@ function addAnn(sel, specs){
   const make = d3.annotation().annotations(specs);
   sel.call(make);
 }
-function annSpec(x,y,dx,dy,title,label){
+function annSpec(x,y,dx,dy,title,label,wrap){
   return { x,y,dx,dy,
-           note:{ title, label, align:"middle" },
+           note:{ title, label, align:"middle", wrap: wrap || 120 },
            subject:{ radius:4 } };
 }
+function updateSceneNav() {
+  const nav = document.getElementById('scene-nav');
+  if (!nav) return;
+  const dots = nav.querySelectorAll('.scene-dot');
+  dots.forEach((dot, i) => {
+    if (i === state.scene) {
+      dot.classList.add('active');
+      dot.setAttribute('aria-current', 'step');
+    } else {
+      dot.classList.remove('active');
+      dot.removeAttribute('aria-current');
+    }
+    dot.onclick = () => {
+      state.scene = i;
+      render();
+    };
+  });
+}
+
 function resize() {
   let w = document.getElementById("graphic").clientWidth;
-  let h = document.getElementById("graphic").clientHeight;
+  let h = window.innerHeight; // Use viewport height
 
   if (w === 0 || h === 0) {
     w = Math.round(window.innerWidth  * 0.60);
@@ -468,8 +557,27 @@ function resize() {
   }
 
   svg.attr("width",  w)
-     .attr("height", h);
+     .attr("height", h)
+     .attr("viewBox", `0 0 ${w} ${h}`);
 
   updateClip();
   render();
 }
+
+svg.append("defs").html(`
+  <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+    <feGaussianBlur stdDeviation="3.5" result="coloredBlur"/>
+    <feMerge>
+      <feMergeNode in="coloredBlur"/>
+      <feMergeNode in="SourceGraphic"/>
+    </feMerge>
+  </filter>
+`);
+
+window.addEventListener('DOMContentLoaded', () => {
+  const chart = document.getElementById('chart');
+  if (chart) {
+    chart.classList.add('fade-in');
+    setTimeout(() => { chart.style.opacity = 1; }, 100);
+  }
+});

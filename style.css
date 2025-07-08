@@ -9,40 +9,48 @@ html, body {
 }
 
 #container {
-  display: flex;
-  flex-direction: column;
-  margin-right: 60vw;
+  display: grid;
+  grid-template-columns: 40vw 60vw;
+  height: 100vh;
 }
 
-#explicit-message {
-  margin-bottom: 3rem !important;
-  display: block;
-  position: relative;
-  z-index: 1;
+.steps {
+  grid-column: 1;
+  overflow-y: auto;
+  height: 100vh;
 }
 
 .step {
-  min-height: 100vh;
-  padding: 3rem 2rem;
+  min-height: 90vh;
+  padding: 1rem 2rem 1.5rem 2rem;
   display: flex;
   flex-direction: column;
   justify-content: center;
 }
 
 #graphic {
-  position: fixed;
+  grid-column: 2;
+  position: sticky;
   top: 0;
-  right: 0;
-  width: 60vw;
   height: 100vh;
+  width: 100%;
+  z-index: 1;
   display: flex;
   align-items: center;
-  justify-content: center;
-  z-index: 10;
-  margin-top: 0;
 }
 
-#chart { width: 100%; height: 100%; display: block; }
+#chart {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+#chart.fade-in {
+  opacity: 0;
+  transition: opacity 1s cubic-bezier(.4,0,.2,1);
+}
+#chart.fade-in[style*="opacity: 1"] {
+  opacity: 1;
+}
 
 h1 { font-size: 3rem; margin: 0 2rem 1rem 0; }
 .subtitle { margin-bottom: 4rem; max-width: 28ch; color: #9fd3ff; }
@@ -70,8 +78,21 @@ h1 { font-size: 3rem; margin: 0 2rem 1rem 0; }
 @media (max-width: 800px) {
   #container { margin-right: 0; flex-direction: column; }
   .step      { flex: 1 0 auto; }
-  #graphic   { position: static; width: 100%; height: 60vh; outline: none; margin-top: 1rem; }
+  #graphic   { position: static; width: 100%; height: 60vh; outline: none; }
   #explicit-message {
     margin-bottom: 2rem !important;
+  }
+}
+
+@media (max-width: 400px) {
+  html, body {
+    font-size: 14px;
+  }
+  .subtitle {
+    font-size: 1em;
+    max-width: 90vw;
+  }
+  h1 {
+    font-size: 2rem;
   }
 }
