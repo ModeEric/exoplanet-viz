@@ -9,7 +9,16 @@ html, body {
 }
 
 #container {
+  display: flex;
+  flex-direction: column;
+  margin-right: 60vw;
+}
+
+#explicit-message {
+  margin-bottom: 3rem !important;
   display: block;
+  position: relative;
+  z-index: 1;
 }
 
 .step {
@@ -30,6 +39,7 @@ html, body {
   align-items: center;
   justify-content: center;
   z-index: 10;
+  margin-top: 0;
 }
 
 #chart { width: 100%; height: 100%; display: block; }
@@ -58,7 +68,10 @@ h1 { font-size: 3rem; margin: 0 2rem 1rem 0; }
 }
 
 @media (max-width: 800px) {
-  #container { flex-direction: column; }
+  #container { margin-right: 0; flex-direction: column; }
   .step      { flex: 1 0 auto; }
-  #graphic   { position: static; width: 100%; height: 60vh; outline: none; }
+  #graphic   { position: static; width: 100%; height: 60vh; outline: none; margin-top: 1rem; }
+  #explicit-message {
+    margin-bottom: 2rem !important;
+  }
 }

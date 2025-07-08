@@ -27,7 +27,7 @@ d3.csv("data/exoplanets.csv", d => ({
   method : d.discoverymethod,
   distAU : +d.pl_orbsmax
 })).then(rows => {
-  exoplanets = rows.filter(d => d.radius && d.year && d.radius < 50);
+  exoplanets = rows.filter(d => d.radius && d.year);
   color.domain([...new Set(exoplanets.map(d => d.method))]);
   initScroll();
 }).catch(error => {
@@ -69,6 +69,10 @@ function render() {
   
   if (state.scene !== 3 && state.scene !== 4) {
     d3.select("#legend").remove();
+  }
+  
+  if (state.scene !== 4) {
+    d3.select("#sliderContainer").remove();
   }
 
   switch (state.scene) {
@@ -135,7 +139,7 @@ function scene1() {
               .domain(d3.extent(yearly, d=>d.year))
               .range([0,w]);
   const y = d3.scaleLinear()
-              .domain([0, d3.max(yearly,d=>d.avg) * 1.1]).nice()
+              .domain([0, d3.max(yearly,d=>d.avg) * 1.2]).nice()
               .range([h,0]);
 
   const line = d3.line()
@@ -161,7 +165,7 @@ function scene1() {
   g.append("text").attr("x",w/2).attr("y",h+40)
     .attr("text-anchor","middle").attr("fill","#ccc").text("Discovery Year");
   g.append("text").attr("x",-h/2).attr("y",-45).attr("transform","rotate(-90)")
-    .attr("text-anchor","middle").attr("fill","#ccc").text("Average Radius (R⊕)");
+    .attr("text-anchor","middle").attr("fill","#ccc").text("Average Planet Radius (Earth radii)");
 
   const first = yearly[0], last = yearly[yearly.length-1];
   [first,last].forEach(pt=>{
@@ -194,8 +198,7 @@ function scene2() {
                   .padding(0.4);
 
   const x = d3.scaleLinear()
-              .domain([0,
-                       d3.quantile(exoplanets, 0.995, d => d.radius) * 1.1])
+              .domain([0, d3.quantile(exoplanets, 0.95, d => d.radius) * 1.1])
               .nice()
               .range([0, w]);
 
@@ -249,7 +252,7 @@ function scene2() {
    .attr("y", h + 28)
    .attr("text-anchor", "middle")
    .attr("fill", "#ccc")
-   .text("Planet Radius (R⊕)");
+   .text("Planet Radius (Earth radii)");
 }
 
 function scene3() {
@@ -262,7 +265,7 @@ function scene3() {
               .domain(d3.extent(exoplanets,d=>d.year))
               .range([0,w]);
   const y = d3.scaleLog()
-              .domain([1, d3.max(exoplanets, d=> d.radius) * 1.1]).nice()
+              .domain([0.5, d3.max(exoplanets, d=> d.radius) * 1.1]).nice()
               .range([h,0]);
 
   const rows = state.methodFilter.size ?
@@ -292,7 +295,7 @@ function scene3() {
   g.append("text").attr("x",w/2).attr("y",h+40).attr("text-anchor","middle")
    .attr("fill","#ccc").text("Discovery Year");
   g.append("text").attr("x",-h/2).attr("y",-45).attr("transform","rotate(-90)")
-   .attr("text-anchor","middle").attr("fill","#ccc").text("Radius (log R⊕)");
+   .attr("text-anchor","middle").attr("fill","#ccc").text("Planet Radius (Earth radii, log scale)");
 
   addAnn(g, [annSpec(x(2009),y(20), 40,-60,
            "Kepler Mission", "Launched in 2009, revolutionized exoplanet discovery with transit photometry")]);
@@ -300,11 +303,37 @@ function scene3() {
 
 function scene4() {
   if (!document.getElementById("yearRange")){
-    d3.select("#graphic").append("input")
+    const sliderContainer = d3.select("#graphic").append("div")
+      .attr("id","sliderContainer")
+      .style("position","absolute")
+      .style("bottom","120px")
+      .style("right","20px")
+      .style("text-align","left")
+      .style("color","#9fd3ff")
+      .style("font-size","14px");
+    
+    sliderContainer.append("div")
+      .style("margin-bottom","8px")
+      .text("Filter by Discovery Year");
+    
+    sliderContainer.append("input")
       .attr("type","range")
       .attr("id","yearRange")
-      .attr("min",1995).attr("max",2024).attr("value",state.yearFilter[1])
-      .on("input", function(){ state.yearFilter[1]=+this.value; render(); });
+      .attr("min",1995)
+      .attr("max",2024)
+      .attr("value",state.yearFilter[1])
+      .style("width","200px")
+      .style("margin","0 10px")
+      .on("input", function(){ 
+        state.yearFilter[1]=+this.value; 
+        render(); 
+      });
+    
+    sliderContainer.append("div")
+      .attr("id","yearRangeLabel")
+      .style("margin-top","8px")
+      .style("font-weight","bold")
+      .text(`Showing planets discovered up to ${state.yearFilter[1]}`);
   }
 
   const margin = {top:40,right:20,bottom:60,left:60};
@@ -312,10 +341,12 @@ function scene4() {
   const h = height()-margin.top-margin.bottom;
   const g = gRoot.append("g").attr("transform",`translate(${margin.left},${margin.top})`);
 
+  const validDistances = exoplanets.filter(d => d.distAU > 0);
   const x = d3.scaleLog()
-              .domain([0.07,15])
+              .domain([d3.min(validDistances, d => d.distAU) * 0.8, 
+                       d3.max(validDistances, d => d.distAU) * 1.2])
               .range([0,w]);
-  const y = d3.scaleLog().domain([0.5, d3.max(exoplanets,d=>d.radius) * 1.1]).range([h,0]);
+  const y = d3.scaleLog().domain([d3.min(exoplanets,d=>d.radius) * 0.8, d3.max(exoplanets,d=>d.radius) * 1.1]).range([h,0]);
 
   let rows = exoplanets.filter(d=>d.year<=state.yearFilter[1]);
   if (state.methodFilter.size)
@@ -326,13 +357,13 @@ function scene4() {
    .join(
      enter => enter.append("circle")
                    .attr("cx",d=>x(d.distAU>0 ? d.distAU
-                                               : (0.07 + (Math.random()*0.05))))
+                                               : (d3.min(validDistances, d => d.distAU) * 0.8 + (Math.random()*0.1))))
                    .attr("cy",d=>y(d.radius))
                    .attr("r",3).attr("fill",d=>color(d.method))
                    .attr("opacity",0).transition().attr("opacity",0.7),
      update => update.transition()
                      .attr("cx",d=>x(d.distAU>0 ? d.distAU
-                                               : (0.07 + (Math.random()*0.05))))
+                                               : (d3.min(validDistances, d => d.distAU) * 0.8 + (Math.random()*0.1))))
                      .attr("cy",d=>y(d.radius)),
      exit   => exit.transition().attr("opacity",0).remove()
    )
@@ -350,17 +381,11 @@ function scene4() {
     .style("stroke", "#ffffff");
 
   g.append("text").attr("x",w/2).attr("y",h+45).attr("text-anchor","middle")
-   .attr("fill","#ccc").text("Orbital Distance (AU)");
+   .attr("fill","#ccc").text("Orbital Distance (Astronomical Units)");
   g.append("text").attr("x",-h/2).attr("y",-45).attr("transform","rotate(-90)")
-   .attr("text-anchor","middle").attr("fill","#ccc").text("Radius (log R⊕)");
+   .attr("text-anchor","middle").attr("fill","#ccc").text("Planet Radius (Earth radii, log scale)");
 
-  d3.select("#yearRangeLabel").remove();
-  d3.select("#graphic").append("div")
-    .attr("id","yearRangeLabel")
-    .style("position","absolute")
-    .style("bottom","15px").style("left","50%").style("transform","translateX(-50%)")
-    .style("color","#9fd3ff")
-    .text(`Showing planets discovered up to ${state.yearFilter[1]}`);
+  d3.select("#yearRangeLabel").text(`Showing planets discovered up to ${state.yearFilter[1]}`);
 }
 
 function drawLegend(){
@@ -371,16 +396,31 @@ function drawLegend(){
                    .attr("id","legend")
                    .style("position","absolute")
                    .style("top","20px")
-                   .style("left","20px")
-                   .attr("width",160)
-                   .attr("height",color.domain().length*22);
+                   .style("right","20px")
+                   .attr("width",200)
+                   .attr("height",color.domain().length*22 + 60);
+                   
+  legend.append("text")
+    .attr("x", 0)
+    .attr("y", 15)
+    .attr("fill", "#fff")
+    .style("font-size", "14px")
+    .style("font-weight", "bold")
+    .text("Discovery Methods");
+    
+  legend.append("text")
+    .attr("x", 0)
+    .attr("y", 30)
+    .attr("fill", "#9fd3ff")
+    .style("font-size", "11px")
+    .text("Click to filter by method");
   const methods = color.domain();
   const size = 14, padding = 6;
 
   legend.selectAll("rect")
     .data(methods)
     .join("rect")
-      .attr("x",0).attr("y",(d,i)=>i*(size+padding))
+      .attr("x",0).attr("y",(d,i)=>i*(size+padding) + 45)
       .attr("width",size).attr("height",size)
       .attr("fill",color)
       .attr("stroke",d=> state.methodFilter.size && !state.methodFilter.has(d) ? "#444":"#fff")
@@ -394,7 +434,7 @@ function drawLegend(){
   legend.selectAll("text")
     .data(methods)
     .join("text")
-      .attr("x",size+5).attr("y",(d,i)=>i*(size+padding)+size-2)
+      .attr("x",size+5).attr("y",(d,i)=>i*(size+padding)+size-2 + 45)
       .attr("fill","#eee").style("font-size","12px").text(d=>d)
       .style("cursor","pointer")
       .on("click", (_,m)=>{ d3.selectAll("rect").filter(d=>d===m).dispatch("click"); });
